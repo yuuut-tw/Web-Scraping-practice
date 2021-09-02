@@ -19,3 +19,6 @@
 4. Taiwan Receipt Lottery
    - 說明：爬取財政部統一發票的每期號碼並提供兌獎功能，主要用於Azure LineChatBot，在OCR光學辨識發票號碼後進行兌獎服務
    - 使用工具：BeautifulSoup
+
+5. Oversea EC Crawler
+   - 說明：嘗試初步爬取國外電商網站
