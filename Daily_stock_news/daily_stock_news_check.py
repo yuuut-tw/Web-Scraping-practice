@@ -6,6 +6,7 @@ import urllib
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from slack_notification import slack_report_bot
 
 
 def get_information(url, key_word, date): 
@@ -21,7 +22,7 @@ def get_information(url, key_word, date):
 
     if len(target_content) > 0:
         # data clean
-        raw = re.sub('\r| ', '', target_content[0]['content']) \
+        raw = re.sub('\r|\u3000| ', '', target_content[0]['content']) \
                 .replace('、',', ') \
                 .split('＊')
         
@@ -45,5 +46,7 @@ if __name__ == '__main__':
     date = datetime.today()
     today_result = get_information(url, key_word, date)
 
-    ## send message to slack 
-    
+
+    ## send message to slack
+    task_type = 'finance_news'
+    slack_report_bot.Slack_BOT().send_crawler_result(task_type, today_result)
