@@ -3,7 +3,9 @@ import re
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-
+from datetime import datetime
+import config.import_config as cf
+from slack_notification import slack_report_bot
 
 url = 'https://www.books.com.tw/web/sys_saletopb/books'
 req = requests.get(url)
@@ -49,4 +51,11 @@ df_output = df_output.sort_values(by='rank')
 
 
 ## excel output
-df_output.to_excel('./book_seller.xlsx', index=False)
+output_path = rf"{cf.config['project_path']}/book_seller_rank_{datetime.today().strftime('%Y%m%d')}.csv"
+df_output.to_csv(output_path, index=False)
+
+
+task_type = 'others'
+slack_report_bot.Slack_BOT().send_crawler_result_as_file(task_type, output_path)
+
+
