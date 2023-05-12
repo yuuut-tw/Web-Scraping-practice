@@ -68,14 +68,17 @@ class Functions():
         
         self.payload["blocks"].append(accessory)
         
+
     # decide slack app's avatar
     def __decide_bot_icon(self, url):
         self.payload["icon_url"] = url
+
 
     # craft and return the entire message payload as a dictionary.
     def __get_message_payload(self):
         self.__decide_channel()
         return self.payload
+
 
     # use slack api to send message 
     def send_message(self, member_ids, decide_message, meg_type): ## 回報error檔名、tag負責人、報錯訊息
@@ -86,6 +89,7 @@ class Functions():
         message = self.__get_message_payload()
         slack_web_client.chat_postMessage(**message)
 
+
     # use slack api to send picture's url as picture message
     def send_picture_as_message(self, decide_picture_as_message):
         slack_web_client = WebClient(self.token) # build connection
@@ -94,14 +98,15 @@ class Functions():
         message = self.__get_message_payload() # decide channel
         slack_web_client.chat_postMessage(**message) # posting message!!!
 
+
     # determine file location and send as message 
-    def send_file(self, file_location):
+    def send_file(self, member_ids, file_location):
         slack_web_client = WebClient(self.token)
         try:
-            response = slack_web_client.files_upload(
-                channels=self.channel,
-                file=file_location
-            )
+            response = slack_web_client.files_upload(channels=self.channel,
+                                                     initial_comment= ' '.join([f"<@{id}>" for id in member_ids]) + ' file sent test!', 
+                                                     file=file_location
+                                                    )
             assert response["file"]  # the uploaded file
         except SlackApiError as e:
             # You will get a SlackApiError if "ok" is False
