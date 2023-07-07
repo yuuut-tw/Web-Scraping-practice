@@ -1,4 +1,10 @@
 
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.path.pardir)))
+sys.path.append(os.path.abspath(os.path.join(__file__, os.path.pardir, os.path.pardir)))
+
 import re
 import pandas as pd
 import requests
@@ -59,3 +65,5 @@ task_type = 'others'
 slack_report_bot.Slack_BOT().send_crawler_result_as_file(task_type, output_path)
 
 
+## remove the csv after sending
+os.remove(output_path)
