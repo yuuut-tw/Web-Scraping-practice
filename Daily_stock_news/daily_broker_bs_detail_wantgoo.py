@@ -1,18 +1,22 @@
 
 import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.path.pardir)))
+sys.path.append(os.path.abspath(os.path.join(__file__, os.path.pardir, os.path.pardir)))
+
 import json
 import pandas as pd
-import numpy as np
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv # 環境變數
 from selenium import webdriver
-import mysql.connector
 import random
 from fake_useragent import UserAgent
 
 import utils.get_db as gb
+import config.import_config as cf
 
 
 ## 解析soup資料，抓取排行、股票名稱、張數、均價
@@ -20,32 +24,20 @@ def data_extractor(raw):
 
     df_output = pd.DataFrame()
 
-    for _ , raw_data in enumerate(raw): # idx= 0
+    for _ , raw_data in enumerate(raw): # idx = 0
+
         stock_name = raw_data.select('td > a')[0].text
+        stock_num = raw_data.select('a')[0]['href'].split('/')[-1]
         unit = raw_data.select('td[c-model="buySell"]')[0].text.replace(',', '')
         avg_price = raw_data.select('td[c-model="avgPrice"]')[0].text
 
-        df_raw = pd.DataFrame(columns=['stock_name', 'unit', 'avg_price'], data=[[stock_name, unit, avg_price]])
+        df_raw = pd.DataFrame(columns=['stock_name', 'stock_num', 'unit', 'avg_price'], data=[[stock_name, stock_num, unit, avg_price]])
         df_output = pd.concat([df_output, df_raw], ignore_index=True)
     
     return df_output
-        
 
-if __name__ == '__main__':
 
-    ### load environment variable
-    env_path = rf'{os.getcwd()}/data/.env'
-    load_dotenv(env_path)
-
-    ### config 
-    # DB
-    my_client = {'host':os.environ['host'],
-                 'user':os.environ['user'],
-                 'pwd' :os.environ['password']}
-    ## broker info
-    with open(rf'{os.getcwd()}\data\broker_data.json', 'r', encoding='utf8') as f:
-        broker_dict = json.loads(f.read())
-
+def main_task(broker_dict):
     
     df_all = pd.DataFrame()
 
@@ -63,8 +55,7 @@ if __name__ == '__main__':
         options.add_argument(f'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36') ## user agent 需常更換
         options.add_argument("--disable-blink-features=AutomationControlled")                                                                               ## 因網頁會防爬蟲，偵測是否為機器人
         
-
-        driver = webdriver.Chrome(options= options, executable_path= rf"{os.getcwd()}\chromedriver.exe")
+        driver = webdriver.Chrome(options= options, executable_path= rf"{cf.config['project_path']}\chromedriver.exe")
 
         driver.get(url)
 
@@ -92,10 +83,40 @@ if __name__ == '__main__':
                                  broker_num = broker_num)
 
         df_all = pd.concat([df_all, df_bs_detail], ignore_index=True)
-        
-        
+
         time.sleep(random.randint(10, 20))
 
+    return df_all
+
+
+if __name__ == '__main__':
+
+    ### load environment variable
+    env_path = rf"{cf.config['project_path']}\data\.env"
+    load_dotenv(env_path)
+
     
+    ## config 
+    # DB
+    my_client = {'host':os.environ['host'],
+                 'user':os.environ['user'],
+                 'pwd' :os.environ['password']}
+    
+    ## broker info
+    with open(rf"{cf.config['project_path']}\data\broker_data.json", 'r', encoding='utf8') as f:
+        broker_dict = json.loads(f.read())
+
+    
+    ## 回傳爬蟲結果
+    df_all = main_task(broker_dict)
+
+    
+    ## 日期驗證 (*若有兩個日期，則抱錯卡住)
+    report_date = list(df_all.date.unique())
+    if len(report_date) > 1:
+        raise Exception("Date isn't unique!")
+    
+
     ## 存庫
+    gb.delete_table(my_client, 'open_data', 'daily_broker_bs_detail', report_date)
     gb.write_table(my_client, 'open_data', 'daily_broker_bs_detail', list(df_all.columns), df_all)
