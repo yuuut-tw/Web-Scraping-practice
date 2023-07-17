@@ -1,4 +1,10 @@
 
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.path.pardir)))
+sys.path.append(os.path.abspath(os.path.join(__file__, os.path.pardir, os.path.pardir)))
+
 from datetime import datetime
 import re
 import json
