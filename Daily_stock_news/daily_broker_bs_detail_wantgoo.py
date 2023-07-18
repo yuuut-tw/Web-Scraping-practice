@@ -100,7 +100,8 @@ if __name__ == '__main__':
     # DB
     my_client = {'host':os.environ['host'],
                  'user':os.environ['user'],
-                 'pwd' :os.environ['password']}
+                 'pwd' :os.environ['password'],
+                 'port' :os.environ['port']}
     
     ## broker info
     with open(rf"{cf.config['project_path']}\data\broker_data.json", 'r', encoding='utf8') as f:
@@ -118,5 +119,6 @@ if __name__ == '__main__':
     
 
     ## 存庫
-    gb.delete_table(my_client, 'open_data', 'daily_broker_bs_detail', report_date)
-    gb.write_table(my_client, 'open_data', 'daily_broker_bs_detail', list(df_all.columns), df_all)
+    db_client = gb.DB_client(my_client)
+    db_client.delete_table('open_data', 'daily_broker_bs_detail', report_date)
+    db_client.write_table('open_data', 'daily_broker_bs_detail', list(df_all.columns), df_all)

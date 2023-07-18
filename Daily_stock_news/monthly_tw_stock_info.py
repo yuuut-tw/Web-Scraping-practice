@@ -29,7 +29,8 @@ class TW_stock_info():
         # DB
         self.my_client = {'host':os.environ['host'],
                           'user':os.environ['user'],
-                          'pwd' :os.environ['password']}
+                          'pwd' :os.environ['password'],
+                          'port' :os.environ['port']}
 
 
     
@@ -75,6 +76,7 @@ class TW_stock_info():
 
     def main_task(self):
         
+        ## 抓取資料
         df_tw_stock_info = self.get_stock_info()
         df_tw_industry_type = self.get_industry_info()
 
@@ -84,12 +86,14 @@ class TW_stock_info():
 
 
         ## 存庫
-        gb.delete_whole_table(self.my_client, 'stock_info', 'tb_tw_stock')
-        gb.write_table(self.my_client, 'stock_info', 'tb_tw_stock', list(df_tw_stock_info.columns), df_tw_stock_info)
+        db_client = gb.DB_client(self.my_client)
+        
+        db_client.delete_whole_table('stock_info', 'tb_tw_stock')
+        db_client.write_table('stock_info', 'tb_tw_stock', list(df_tw_stock_info.columns), df_tw_stock_info)
 
 
-        gb.delete_whole_table(self.my_client, 'tb_mapping', 'tb_industry_type')
-        gb.write_table(self.my_client, 'tb_mapping', 'tb_industry_type', list(df_tw_industry_type.columns), df_tw_industry_type)
+        db_client.delete_whole_table('tb_mapping', 'tb_industry_type')
+        db_client.write_table('tb_mapping', 'tb_industry_type', list(df_tw_industry_type.columns), df_tw_industry_type)
 
 
 
