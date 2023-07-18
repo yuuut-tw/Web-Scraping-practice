@@ -50,7 +50,7 @@ class Slack_BOT():
         slack_bot.send_message(member_ids, result, meg_type='UPDATE') #### Blocks format required!!
     
 
-    def send_crawler_result_as_file(self, task_type, file_location):
+    def send_crawler_result_as_file(self, task_type, file_location, meg=''):
         
         ## get credential data
         TYPE = self.task_type_token[task_type]['token_name']
@@ -68,4 +68,4 @@ class Slack_BOT():
         slack_bot = sf.Functions(channel, token, bot_icon)
         
 
-        slack_bot.send_file(member_ids, file_location) #### Blocks format required!!
+        slack_bot.send_file(member_ids, file_location, meg) #### Blocks format required!!
