@@ -100,14 +100,17 @@ class Functions():
 
 
     # determine file location and send as message 
-    def send_file(self, member_ids, file_location):
+    def send_file(self, member_ids, file_location, meg):
+        
         slack_web_client = WebClient(self.token)
+        
         try:
             response = slack_web_client.files_upload(channels=self.channel,
-                                                     initial_comment= ' '.join([f"<@{id}>" for id in member_ids]) + ' file sent test!', 
+                                                     initial_comment= ' '.join([f"<@{id}>" for id in member_ids]) + f' {meg}', 
                                                      file=file_location
                                                     )
             assert response["file"]  # the uploaded file
+        
         except SlackApiError as e:
             # You will get a SlackApiError if "ok" is False
             assert e.response["ok"] is False
