@@ -131,7 +131,7 @@ def get_bs_top10(report_date, df_stock_info):
 if __name__ == '__main__':
 
     ### load environment variable
-    env_path = rf"{cf.config['project_path']}\data\.env"
+    env_path = rf"{cf.config['project_path']}/data/.env"
     load_dotenv(env_path)
 
     
@@ -143,7 +143,7 @@ if __name__ == '__main__':
                  'port' :os.environ['port']}
     
     ## broker info
-    with open(rf"{cf.config['project_path']}\data\broker_data.json", 'r', encoding='utf8') as f:
+    with open(rf"{cf.config['project_path']}/data/broker_data.json", 'r', encoding='utf8') as f:
         broker_dict = json.loads(f.read())
 
     
