@@ -58,8 +58,8 @@ def main_task(broker_dict):
         options.add_argument(f'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36') ## user agent 需常更換
         options.add_argument("--disable-blink-features=AutomationControlled")                                                                               ## 因網頁會防爬蟲，偵測是否為機器人
         
-        driver = webdriver.Chrome(options= options, executable_path= rf"{cf.config['project_path']}\chromedriver.exe")
-
+        driver = webdriver.Chrome(options= options)
+        
         driver.get(url)
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
